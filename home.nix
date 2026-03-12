@@ -6,6 +6,12 @@
   # Deaktiver versjonsjekk for Home Manager
   home.enableNixpkgsReleaseCheck = false;
 
+  # Byobu/tmux – bruk zsh som shell
+  programs.tmux = {
+    enable = true;
+    shell = "${pkgs.zsh}/bin/zsh";
+  };
+
   # Nerd Font (nødvendig for Starship-ikoner)
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
@@ -66,6 +72,10 @@
       grep = "rg";
       ".." = "cd ..";
       "..." = "cd ../..";
+      # Git aliases
+      g     = "git";
+      gpull = "git pull --rebase --autostash";
+      gpush = "git push";
     };
 
     history = {
