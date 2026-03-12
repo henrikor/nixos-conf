@@ -47,6 +47,15 @@
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
+  # Hyprland – vises som valg i GDM-innloggingsskjermen
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+
+  # Polkit – nødvendig for auth-dialogs i Wayland/Hyprland
+  security.polkit.enable = true;
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "no";

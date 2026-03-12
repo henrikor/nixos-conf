@@ -30,6 +30,23 @@
     delta       # bedre git diff
     # Nerd Font
     nerd-fonts.jetbrains-mono
+    # Hyprland-økosystem
+    waybar                   # statuslinje
+    rofi                     # app-launcher (inkluderer wayland-støtte)
+    flameshot                # skjermbilder
+    hyprlock                 # skjermlås
+    swaylock                 # alternativ skjermlås
+    swayidle                 # idle/timeout
+    networkmanagerapplet     # nm-applet nettverksikon
+    volumeicon               # volum-ikon i tray
+    variety                  # bakgrunnsbilde-rotasjon
+    # Produktivitet
+    obsidian                 # notater (workspace 7)
+    thunderbird              # e-post (workspace 3)
+    joplin-desktop           # notater (workspace 7)
+    remmina                  # remote desktop (workspace 6)
+    discord                  # chat (workspace 10)
+    kdePackages.polkit-kde-agent-1  # auth-agent for Wayland
   ];
 
   # Zsh-konfigurasjon
@@ -46,6 +63,11 @@
     ];
 
     initContent = ''
+      # Start polkit-agent hvis vi er i Hyprland
+      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+        ${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1 &
+      fi
+
       # zoxide (smart cd)
       eval "$(zoxide init zsh --cmd cd)"
 
