@@ -19,10 +19,8 @@
     neovim
     brave
     element-desktop
-    vscode
     proton-pass
     protonvpn-gui
-    # CLI-verktøy
     fd          # rask filsøk (brukes av fzf)
     bat         # bedre cat med syntaks-highlighting
     eza         # bedre ls
@@ -84,6 +82,9 @@
       export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --inline-info'
 
       export EDITOR=nvim
+
+      # Wayland-støtte for Electron/Chromium-apper (Brave, VSCode, Discord osv.)
+      export NIXOS_OZONE_WL=1
     '';
 
     shellAliases = {
@@ -267,6 +268,19 @@
       };
     };
   };
+
+  # VSCode – forhindre frysing av filvelger på Wayland
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode;
+  };
+
+  # VSCode Wayland-flagg via argv.json
+  xdg.configFile."code-flags.conf".text = ''
+    --enable-features=WaylandWindowDecorations
+    --ozone-platform-hint=auto
+    --password-store=gnome-libsecret
+  '';
 
   # GNOME Terminal – sett JetBrains Mono Nerd Font
   dconf.settings = {

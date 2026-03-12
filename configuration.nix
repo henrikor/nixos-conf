@@ -4,6 +4,11 @@
 
 { config, pkgs, ... }:
 
+let
+  unstable = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz") {
+    config.allowUnfree = true;
+  };
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -47,14 +52,21 @@
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
-  # Hyprland – vises som valg i GDM-innloggingsskjermen
+  # Hyprland – siste versjon fra nixpkgs-unstable
   programs.hyprland = {
     enable = true;
+    package = unstable.hyprland;
+    portalPackage = unstable.xdg-desktop-portal-hyprland;
     xwayland.enable = true;
   };
 
   # Polkit – nødvendig for auth-dialogs i Wayland/Hyprland
   security.polkit.enable = true;
+
+  # Wayland-støtte for Electron/Chromium-apper globalt
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {
