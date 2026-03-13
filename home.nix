@@ -45,6 +45,8 @@
     remmina                  # remote desktop (workspace 6)
     discord                  # chat (workspace 10)
     kdePackages.polkit-kde-agent-1  # auth-agent for Wayland
+    signal-desktop            # chat (workspace 10)
+    redshift                   # nattmodus
   ];
 
   # Zsh-konfigurasjon
