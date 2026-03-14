@@ -73,8 +73,42 @@
     evolution-ews
     protonvpn-gui
     protonmail-bridge-gui
+    viu
+    chafa
     kitty
+    broot
+
   ];
+
+  # Script for broot preview (placed in ~/bin by home-manager)
+  home.file."bin/broot-preview".text = ''
+#!/usr/bin/env bash
+set -euo pipefail
+
+file="$1"
+if [ -z "$file" ]; then
+  exit 0
+fi
+
+if command -v kitty >/dev/null 2>&1; then
+  kitty +kitten icat --silent "$file"
+elif command -v viu >/dev/null 2>&1; then
+  viu "$file"
+else
+  chafa --symbols braille --size=80x40 "$file"
+fi
+'';
+  home.file."bin/broot-preview".executable = true;
+
+  # broot config: add action 'p' to preview files via the script
+  xdg.configFile."broot/conf.toml".text = ''
+[[actions]]
+invocation = "p"
+name = "preview"
+command = "sh -lc '/home/henrik/bin/broot-preview \"{path}\"'"
+silent = false
+'';
+
 
   programs.workstyle.enable = true;
 
