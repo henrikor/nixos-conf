@@ -8,6 +8,9 @@ let
   unstable = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz") {
     config.allowUnfree = true;
   };
+  sops-nix = builtins.fetchTarball {
+    url = "https://github.com/Mic92/sops-nix/archive/master.tar.gz";
+  };
 in
 {
   imports =
@@ -17,6 +20,8 @@ in
       ./modules/users.nix
       # Home Manager module
       <home-manager/nixos>
+      # sops-nix for hemmeligheter
+      "${sops-nix}/modules/sops"
     ];
 
 #  nix = {
@@ -62,6 +67,14 @@ in
 
   # Polkit – nødvendig for auth-dialogs i Wayland/Hyprland
   security.polkit.enable = true;
+
+  # Lås opp GNOME Keyring automatisk via PAM ved GDM-innlogging.
+  # For at Electron/Wire safeStorage (gnome-libsecret) skal fungere i Hyprland.
+  security.pam.services.gdm.enableGnomeKeyring = true;
+  security.pam.services.gdm-password.enableGnomeKeyring = true;
+
+  # Bruk Flatpak for skrivebordsapper som fungerer bedre med upstream-runtime.
+  services.flatpak.enable = true;
 
   # Wayland-støtte for Electron/Chromium-apper globalt
   environment.sessionVariables = {
@@ -119,6 +132,11 @@ in
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+
+  # sops-nix konfigurasjon
+  sops.defaultSopsFile = ./secrets/secrets.yaml;
+  sops.age.keyFile = "/home/henrik/.config/age/key.txt";
+  sops.age.generateKey = false;
 
   # Home Manager configuration
   home-manager.useGlobalPkgs = true;

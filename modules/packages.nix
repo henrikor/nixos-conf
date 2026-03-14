@@ -10,7 +10,6 @@
      nix-index
      hyprland
      waybar
-     yadm
      tmux
      zsh
      nerd-fonts.meslo-lg

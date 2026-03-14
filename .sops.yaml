@@ -1,0 +1,11 @@
+keys:
+  # Legg til din age public key her etter å ha kjørt:
+  #   age-keygen -o ~/.config/age/key.txt
+  #   cat ~/.config/age/key.txt | grep "public key"
+  - &henrik age1ug27wxndned0j7yrw9hvzejr02ly9j577dl8qg5e2gd5rgfmpumqjudlvx
+
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *henrik

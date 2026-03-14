@@ -1,55 +1,82 @@
 { config, pkgs, ... }:
 {
-  # Home Manager version
   home.stateVersion = "25.11";
-
-  # Deaktiver versjonsjekk for Home Manager
+  home.username = "henrik";
+  home.homeDirectory = "/home/henrik";
   home.enableNixpkgsReleaseCheck = false;
 
-  # Byobu/tmux – bruk zsh som shell
+  # Sett miljøvariabler globalt for alle programmer
+  home.sessionVariables = {
+    QT_QPA_PLATFORM = "xcb";
+    NIXOS_OZONE_WL = "1";
+    EDITOR = "nvim";
+  };
+
   programs.tmux = {
     enable = true;
     shell = "${pkgs.zsh}/bin/zsh";
   };
 
-  # Nerd Font (nødvendig for Starship-ikoner)
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
     htop
     neovim
-    brave
+    (brave.override {
+      commandLineArgs = [
+        "--ozone-platform=x11"
+        "--disable-features=UseOzonePlatform"
+        "--disable-gpu"
+        "--password-store=basic"
+      ];
+    })
     element-desktop
     proton-pass
     protonvpn-gui
-    fd          # rask filsøk (brukes av fzf)
-    bat         # bedre cat med syntaks-highlighting
-    eza         # bedre ls
-    ripgrep     # bedre grep
-    delta       # bedre git diff
-    # Nerd Font
+    fd
+    bat
+    eza
+    ripgrep
+    delta
     nerd-fonts.jetbrains-mono
-    # Hyprland-økosystem
-    waybar                   # statuslinje
-    rofi                     # app-launcher (inkluderer wayland-støtte)
-    flameshot                # skjermbilder
-    hyprlock                 # skjermlås
-    swaylock                 # alternativ skjermlås
-    swayidle                 # idle/timeout
-    networkmanagerapplet     # nm-applet nettverksikon
-    volumeicon               # volum-ikon i tray
-    variety                  # bakgrunnsbilde-rotasjon
-    # Produktivitet
-    obsidian                 # notater (workspace 7)
-    thunderbird              # e-post (workspace 3)
-    joplin-desktop           # notater (workspace 7)
-    remmina                  # remote desktop (workspace 6)
-    discord                  # chat (workspace 10)
-    kdePackages.polkit-kde-agent-1  # auth-agent for Wayland
-    signal-desktop            # chat (workspace 10)
-    redshift                   # nattmodus
+    waybar
+    rofi
+    fuzzel
+    flameshot
+    hyprlock
+    swaylock
+    swayidle
+    networkmanagerapplet
+    volumeicon
+    variety
+    obsidian
+    thunderbird
+    joplin-desktop
+    remmina
+    discord
+    kdePackages.polkit-kde-agent-1
+    signal-desktop
+    redshift
+    chromium
+    python3
+    nodejs
+    rustup
+    birdtray
+    direnv
+    aphorme
+    slack
+    seahorse
+    # Secrets-verktøy
+    chezmoi
+    age
+    sops
+    evolution
+    evolution-ews
+    protonvpn-gui
+    protonmail-bridge-gui
   ];
 
-  # Zsh-konfigurasjon
+  programs.workstyle.enable = true;
+
   programs.zsh = {
     enable = true;
     autocd = true;
@@ -65,7 +92,12 @@
     initContent = ''
       # Start polkit-agent hvis vi er i Hyprland
       if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-        ${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1 &
+        # Synk miljøet med systemd --user slik at Electron-apper ser DBus-tenester
+        dbus-update-activation-environment --systemd --all >/dev/null 2>&1 || true
+
+        if ! pgrep -u "$USER" -f "polkit-kde-authentication-agent-1" >/dev/null; then
+          ${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1 >/dev/null 2>&1 &
+        fi
       fi
 
       # zoxide (smart cd)
@@ -82,11 +114,6 @@
 
       # Bedre fzf-utseende
       export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --inline-info'
-
-      export EDITOR=nvim
-
-      # Wayland-støtte for Electron/Chromium-apper (Brave, VSCode, Discord osv.)
-      export NIXOS_OZONE_WL=1
     '';
 
     shellAliases = {
@@ -97,10 +124,13 @@
       grep = "rg";
       ".." = "cd ..";
       "..." = "cd ../..";
-      # Git aliases
       g     = "git";
       gpull = "git pull --rebase --autostash";
       gpush = "git push";
+      gsw   = "git switch";
+      gco   = "git checkout";
+      gcm   = "git commit -am";
+      byobu = "byobu-tmux";
     };
 
     history = {
@@ -112,7 +142,6 @@
     };
   };
 
-  # Starship prompt
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
@@ -189,19 +218,16 @@
     };
   };
 
-  # fzf
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
   };
 
-  # zoxide (smart cd som husker kataloger)
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
   };
 
-  # Alacritty terminal
   programs.alacritty = {
     enable = true;
     settings = {
@@ -227,7 +253,6 @@
         size = 13.0;
       };
       colors = {
-        # Catppuccin Mocha
         primary = {
           background = "0x1e1e2e";
           foreground = "0xcdd6f4";
@@ -271,20 +296,25 @@
     };
   };
 
-  # VSCode – forhindre frysing av filvelger på Wayland
   programs.vscode = {
     enable = true;
     package = pkgs.vscode;
   };
 
-  # VSCode Wayland-flagg via argv.json
   xdg.configFile."code-flags.conf".text = ''
     --enable-features=WaylandWindowDecorations
     --ozone-platform-hint=auto
     --password-store=gnome-libsecret
   '';
 
-  # GNOME Terminal – sett JetBrains Mono Nerd Font
+
+  # Gjør at standalone home-manager/nix kommandoer tillater unfree pakker.
+  xdg.configFile."nixpkgs/config.nix".text = ''
+    {
+      allowUnfree = true;
+    }
+  '';
+
   dconf.settings = {
     "org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9" = {
       font = "JetBrainsMono Nerd Font 13";
@@ -294,7 +324,6 @@
     };
   };
 
-  # Git-konfigurasjon
   programs.git = {
     enable = true;
     settings = {
