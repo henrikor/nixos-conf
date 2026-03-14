@@ -73,6 +73,7 @@
     evolution-ews
     protonvpn-gui
     protonmail-bridge-gui
+    kitty
   ];
 
   programs.workstyle.enable = true;
