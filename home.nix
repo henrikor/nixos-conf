@@ -110,6 +110,23 @@ home.file.".zsh/plugins/chezmoi.plugin.zsh".source = "${builtins.fetchTarball {
   sha256 = "0bi8r2p2md98v8l8f506rkmh3nbv8532va4nx64szsc19pdw84x6";
 }}/chezmoi.plugin.zsh";
 home.file.".zsh/plugins/chezmoi.plugin.zsh".executable = false;
+  # alias.awk used by the zsh-chezmoi plugin to map git aliases
+  home.file.".zsh/plugins/alias.awk".text = ''
+# Alias starts with "g" and command starts with "git"
+$1 ~ /^g/ && $2 ~ /^git /
+{
+  # Find first occurence of single quote
+  i = index($0, "'");
+  # Get index after "git "
+  start = i + 5;
+  # Get length to extract, careful of trailing single quote
+  len = length($0) - i - 5;
+  # Extract git subcommand
+  rest = substr($0, start, len);
+  # Build chezmoi git command, escaping options with "--"
+  print "alias ch" $1 "='chezmoi git -- " rest "'"
+}
+'';
 
 
   programs.workstyle.enable = true;
@@ -186,77 +203,11 @@ home.file.".zsh/plugins/chezmoi.plugin.zsh".executable = false;
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    settings = {
-      add_newline = true;
-
-      format = "$username$hostname$directory$git_branch$git_status$nix_shell$python$nodejs$rust$cmd_duration$line_break$character";
-
-      character = {
-        success_symbol = "[❯](bold green)";
-        error_symbol   = "[❯](bold red)";
-        vimcmd_symbol  = "[❮](bold yellow)";
-      };
-
-      username = {
-        show_always = false;
-        style_user  = "bold yellow";
-        format      = "[$user]($style) ";
-      };
-
-      directory = {
-        truncate_to_repo    = true;
-        style               = "bold cyan";
-        read_only           = " 🔒";
-        home_symbol         = " ~";
-        truncation_symbol   = "…/";
-      };
-
-      git_branch = {
-        symbol = " ";
-        style  = "bold purple";
-        format = "[$symbol$branch]($style) ";
-      };
-
-      git_status = {
-        style      = "bold yellow";
-        format     = ''([$all_status$ahead_behind]($style) )'';
-        conflicted = "⚡";
-        ahead      = ''⇡''${count}'';
-        behind     = ''⇣''${count}'';
-        diverged   = ''⇕⇡''${ahead_count}⇣''${behind_count}'';
-        untracked  = ''?''${count}'';
-        stashed    = " ";
-        modified   = ''!''${count}'';
-        staged     = ''+''${count}'';
-        deleted    = ''✘''${count}'';
-      };
-
-      cmd_duration = {
-        min_time = 2000;
-        format   = "[ $duration](bold yellow) ";
-      };
-
-      nix_shell = {
-        symbol = "❄️ ";
-        style  = "bold blue";
-        format = "[$symbol$state]($style) ";
-      };
-
-      python = {
-        symbol = " ";
-        style  = "bold yellow";
-      };
-
-      nodejs = {
-        symbol = " ";
-        style  = "bold green";
-      };
-
-      rust = {
-        symbol = " ";
-        style  = "bold red";
-      };
-    };
+    # Track official preset directly in Home Manager-managed config.
+    settings = builtins.fromTOML (builtins.readFile (pkgs.fetchurl {
+      url = "https://starship.rs/presets/toml/catppuccin-powerline.toml";
+      sha256 = "0bd8zx0bpri63rnb9dva0rav75d3i2wrzw44h63m75hq5220r26g";
+    }));
   };
 
   programs.fzf = {
