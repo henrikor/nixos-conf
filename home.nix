@@ -73,11 +73,12 @@
     evolution-ews
     protonvpn-gui
     protonmail-bridge-gui
+    protonmail-bridge
     viu
     chafa
     kitty
     broot
-
+    zoom-us
   ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
