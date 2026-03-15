@@ -12,6 +12,7 @@
      waybar
      tmux
      zsh
+     bash
      nerd-fonts.meslo-lg
   ];
 }

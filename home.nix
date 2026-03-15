@@ -21,14 +21,7 @@
   home.packages = with pkgs; [
     htop
     neovim
-    (brave.override {
-      commandLineArgs = [
-        "--ozone-platform=x11"
-        "--disable-features=UseOzonePlatform"
-        "--disable-gpu"
-        "--password-store=basic"
-      ];
-    })
+    brave
     element-desktop
     proton-pass
     protonvpn-gui
@@ -41,7 +34,6 @@
     waybar
     rofi
     fuzzel
-    flameshot
     hyprlock
     swaylock
     swayidle
@@ -79,6 +71,8 @@
     kitty
     broot
     zoom-us
+    hyprshot
+    satty
   ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
@@ -335,6 +329,32 @@ silent = false
   programs.vscode = {
     enable = true;
     package = pkgs.vscode;
+  };
+
+  # Inaktivitet: dim skjermen gradvis i 30 sekunder før lås.
+  systemd.user.services.swayidle = {
+    Unit = {
+      Description = "Swayidle with gradual dim before lock";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = ''
+        ${pkgs.swayidle}/bin/swayidle -w \
+          timeout 270 'runtime="''${XDG_RUNTIME_DIR:-/tmp}"; orig="$(${pkgs.brightnessctl}/bin/brightnessctl g)"; max="$(${pkgs.brightnessctl}/bin/brightnessctl m)"; echo "$orig" > "$runtime/swayidle-brightness"; (i=1; while [ "$i" -le 30 ]; do cur="$(${pkgs.brightnessctl}/bin/brightnessctl g)"; step=$(( max / 300 )); [ "$step" -lt 1 ] && step=1; target=$(( cur - step )); [ "$target" -lt 1 ] && target=1; ${pkgs.brightnessctl}/bin/brightnessctl set "$target" >/dev/null; sleep 1; i=$((i + 1)); done) & echo "$!" > "$runtime/swayidle-dim.pid"' \
+          timeout 300 '${pkgs.hyprlock}/bin/hyprlock' \
+          resume 'runtime="''${XDG_RUNTIME_DIR:-/tmp}"; if [ -f "$runtime/swayidle-dim.pid" ]; then kill "$(cat "$runtime/swayidle-dim.pid")" >/dev/null 2>&1 || true; rm -f "$runtime/swayidle-dim.pid"; fi; if [ -f "$runtime/swayidle-brightness" ]; then ${pkgs.brightnessctl}/bin/brightnessctl set "$(cat "$runtime/swayidle-brightness")" >/dev/null; rm -f "$runtime/swayidle-brightness"; fi' \
+          before-sleep '${pkgs.hyprlock}/bin/hyprlock'
+      '';
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
   };
 
   xdg.configFile."code-flags.conf".text = ''
