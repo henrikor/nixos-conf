@@ -104,6 +104,13 @@ command = "sh -lc '/home/henrik/bin/broot-preview \"{path}\"'"
 silent = false
 '';
 
+# Install zsh-chezmoi plugin from GitHub and place it under ~/.zsh/plugins
+home.file.".zsh/plugins/chezmoi.plugin.zsh".source = "${builtins.fetchTarball {
+  url = "https://github.com/mass8326/zsh-chezmoi/archive/refs/heads/main.tar.gz";
+  sha256 = "0bi8r2p2md98v8l8f506rkmh3nbv8532va4nx64szsc19pdw84x6";
+}}/chezmoi.plugin.zsh";
+home.file.".zsh/plugins/chezmoi.plugin.zsh".executable = false;
+
 
   programs.workstyle.enable = true;
 
@@ -144,6 +151,10 @@ silent = false
 
       # Bedre fzf-utseende
       export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --inline-info'
+      # Source local chezmoi zsh plugin if present
+      if [ -f "$HOME/.zsh/plugins/chezmoi.plugin.zsh" ]; then
+        source "$HOME/.zsh/plugins/chezmoi.plugin.zsh"
+      fi
     '';
 
     shellAliases = {
