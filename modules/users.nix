@@ -8,6 +8,10 @@
     syntaxHighlighting.enable = true;
   };
 
+  users.users.root = {
+    shell = pkgs.zsh;
+  };
+
   users.users.henrik = {
     isNormalUser = true;
     description = "Henrik Ormåsen";

@@ -142,6 +142,7 @@ in
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.users.henrik = import ./home.nix;
+  home-manager.users.root = import ./root.nix;
 
   # List services that you want to enable:
 
