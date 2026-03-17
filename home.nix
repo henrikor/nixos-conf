@@ -73,6 +73,7 @@
     zoom-us
     hyprshot
     satty
+    onlyoffice-desktopeditors
   ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
