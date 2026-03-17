@@ -298,6 +298,18 @@ $1 ~ /^g/ && $2 ~ /^git /
 }
 '';
 
+  # Kitty terminal config: use the patched Nerd Font so icons/glyphs render
+  home.file.".config/kitty/kitty.conf".text = ''
+font_family JetBrainsMono Nerd Font Mono
+bold_font JetBrainsMono Nerd Font Mono Bold
+italic_font JetBrainsMono Nerd Font Mono Italic
+font_size 13.0
+
+# Ensure kitty can fall back to color emoji if needed
+emoji_font_family Noto Color Emoji
+'';
+  home.file.".config/kitty/kitty.conf".force = true;
+
   # Inaktivitet: dim skjermen gradvis i 30 sekunder før lås.
   systemd.user.services.swayidle = {
     Unit = {
