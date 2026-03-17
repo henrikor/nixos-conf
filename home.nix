@@ -16,8 +16,7 @@
     enable = true;
     shell = "${pkgs.zsh}/bin/zsh";
   };
-
-  fonts.fontconfig.enable = true;
+  
   home.packages = with pkgs; [
     htop
     neovim
@@ -42,7 +41,6 @@
     variety
     obsidian
     thunderbird
-    joplin-desktop
     remmina
     discord
     kdePackages.polkit-kde-agent-1
@@ -204,11 +202,8 @@ $1 ~ /^g/ && $2 ~ /^git /
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    # Track official preset directly in Home Manager-managed config.
-    settings = builtins.fromTOML (builtins.readFile (pkgs.fetchurl {
-      url = "https://starship.rs/presets/toml/catppuccin-powerline.toml";
-      sha256 = "0bd8zx0bpri63rnb9dva0rav75d3i2wrzw44h63m75hq5220r26g";
-    }));
+    # Note: configuration is managed outside Nix in ~/.config/starship.toml
+    # To use a preset, place your config at that path or use the starship CLI.
   };
 
   programs.fzf = {
@@ -293,6 +288,15 @@ $1 ~ /^g/ && $2 ~ /^git /
     enable = true;
     package = pkgs.vscode;
   };
+
+  # Ensure VS Code uses the patched Nerd Font for editor and integrated terminal.
+  # This file is managed by Home Manager; adjust if you keep local settings elsewhere.
+  home.file.".config/Code/User/settings.json".text = ''{
+  "editor.fontFamily": "JetBrainsMono Nerd Font Mono, JetBrainsMono Nerd Font, FiraCode Nerd Font, Fira Code, monospace",
+  "editor.fontLigatures": true,
+  "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono, FiraCode Nerd Font, monospace"
+}
+'';
 
   # Inaktivitet: dim skjermen gradvis i 30 sekunder før lås.
   systemd.user.services.swayidle = {
