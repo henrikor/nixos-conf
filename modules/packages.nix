@@ -13,6 +13,7 @@
      tmux
      zsh
      bash
+     ripgrep
      nerd-fonts.meslo-lg
   ];
 }

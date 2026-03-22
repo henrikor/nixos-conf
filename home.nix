@@ -27,7 +27,6 @@
     fd
     bat
     eza
-    ripgrep
     delta
     nerd-fonts.jetbrains-mono
     waybar
@@ -72,6 +71,11 @@
     hyprshot
     satty
     onlyoffice-desktopeditors
+    libreoffice
+    kdePackages.okular
+    zathura
+    calibre
+    hp-unified-linux-driver
   ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
