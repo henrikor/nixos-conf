@@ -44,6 +44,8 @@
     discord
     kdePackages.polkit-kde-agent-1
     signal-desktop
+    gammastep
+    geoclue2
     redshift
     chromium
     python3

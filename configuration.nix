@@ -44,6 +44,9 @@ in
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # Bluetooth system support
+  hardware.bluetooth.enable = true;
+
   # Set your time zone.
   time.timeZone = "Europe/Oslo";
 
@@ -124,6 +127,11 @@ in
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
+  environment.systemPackages = with pkgs; [
+    blueman
+    bluez
+    pavucontrol
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
