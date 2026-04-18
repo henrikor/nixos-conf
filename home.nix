@@ -1,4 +1,9 @@
 { config, pkgs, ... }:
+let
+  braveXwayland = pkgs.brave.override {
+    commandLineArgs = "--ozone-platform=x11 --password-store=gnome-libsecret";
+  };
+in
 {
   home.stateVersion = "25.11";
   home.username = "henrik";
@@ -20,7 +25,7 @@
   home.packages = with pkgs; [
     htop
     neovim
-    brave
+    braveXwayland
     element-desktop
     proton-pass
     protonvpn-gui
