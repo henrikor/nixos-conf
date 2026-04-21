@@ -15,6 +15,7 @@
      bash
      ripgrep
      nerd-fonts.meslo-lg
+     hplip
   ];
 }
 

@@ -28,7 +28,9 @@ in
     braveXwayland
     element-desktop
     proton-pass
-    protonvpn-gui
+    proton-vpn
+    protonmail-bridge-gui
+    protonmail-bridge
     fd
     bat
     eza
@@ -67,9 +69,6 @@ in
     sops
     evolution
     evolution-ews
-    protonvpn-gui
-    protonmail-bridge-gui
-    protonmail-bridge
     viu
     chafa
     kitty
@@ -83,7 +82,8 @@ in
     zathura
     calibre
     hp-unified-linux-driver
-  ];
+    texliveFull 
+ ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
   home.file."bin/broot-preview".text = ''
