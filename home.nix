@@ -80,9 +80,11 @@ in
     libreoffice
     kdePackages.okular
     zathura
+    evince
     calibre
     hp-unified-linux-driver
-    texliveFull 
+    texliveFull
+    inkscape-with-extensions
  ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
