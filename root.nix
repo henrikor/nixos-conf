@@ -44,14 +44,15 @@
       # Use store path directly to avoid depending on ~/.nix-profile.
       eval "$(${pkgs.starship}/bin/starship init zsh)"
 
-      # Upgrade helper:
+      # Upgrade helper - IMPROVED VERSION
       # - system update via nixos-rebuild --upgrade (channel-based system config)
-      # - Home Manager updates via flake in REPO when available
+      # - Home Manager updates via flake in REPO with explicit rebuild and feedback
       upgrade-os() {
-        REPO=/home/henrik/nixos-config
-
-        SEARCH="$REPO"
-        FOUND=""
+        local REPO=/home/henrik/nixos-config
+        local SEARCH="$REPO"
+        local FOUND=""
+        
+        # Find flake.nix in repo or parents
         while [ -n "$SEARCH" ] && [ "$SEARCH" != "/" ]; do
           if [ -f "$SEARCH/flake.nix" ]; then
             FOUND="$SEARCH"
@@ -60,30 +61,71 @@
           SEARCH=$(dirname "$SEARCH")
         done
 
-        echo "Updating NixOS system (channel workflow)..."
-        nixos-rebuild switch --upgrade || { echo "nixos-rebuild --upgrade failed"; return 1; }
+        # ========== SYSTEM UPGRADE ==========
+        echo "🔄 Updating NixOS system (channel workflow)..."
+        if nixos-rebuild switch --upgrade; then
+          echo "✅ NixOS system updated successfully"
+        else
+          echo "❌ nixos-rebuild --upgrade failed"
+          return 1
+        fi
 
+        # ========== FLAKE DISCOVERY ==========
         if [ -z "$FOUND" ]; then
-          echo "No flake.nix found under $REPO or its parents; skipping flake-based Home Manager updates"
-          home-manager switch || true
+          echo "⚠️  No flake.nix found under $REPO or its parents; using standard home-manager"
+          home-manager switch || { echo "❌ home-manager switch failed"; return 1; }
           return 0
         fi
 
-        # Resolve symlinked flake.nix to its real repo directory so we don't
-        # accidentally treat /home/henrik (or other parent dirs) as the flake root.
-        CANON=$(readlink -f "$FOUND/flake.nix" 2>/dev/null || true)
+        # Resolve symlinked flake.nix to its real repo directory
+        local CANON=$(readlink -f "$FOUND/flake.nix" 2>/dev/null || true)
         if [ -n "$CANON" ]; then
           REPO=$(dirname "$CANON")
         else
           REPO="$FOUND"
         fi
 
-        echo "Updating flake inputs for Home Manager in $REPO..."
-        nix flake update --flake "$REPO" || { echo "flake update failed"; return 1; }
+        # ========== SHOW CURRENT REVISIONS ==========
+        echo ""
+        echo "📋 Current flake revisions in $REPO:"
+        nix flake metadata --flake "$REPO" 2>/dev/null | grep -E "^  (nixpkgs|home-manager):" | head -2
+        echo ""
 
-        echo "Switching Home Manager for root and henrik (flake)..."
-        home-manager switch --flake "$REPO#root" || true
-        runuser -u henrik -- home-manager switch --flake "$REPO#henrik" || true
+        # ========== UPDATE FLAKE ==========
+        echo "🔄 Updating flake inputs (Home Manager)..."
+        if nix flake update --flake "$REPO"; then
+          echo "✅ Flake inputs updated successfully"
+        else
+          echo "❌ nix flake update failed - HOME MANAGER MAY NOT BE UPDATED!"
+          return 1
+        fi
+
+        # ========== SHOW NEW REVISIONS ==========
+        echo ""
+        echo "📋 Updated flake revisions:"
+        nix flake metadata --flake "$REPO" 2>/dev/null | grep -E "^  (nixpkgs|home-manager):" | head -2
+        echo ""
+
+        # ========== REBUILD HOME MANAGERS ==========
+        echo "🔄 Rebuilding Home Manager for root..."
+        if home-manager switch --flake "$REPO#root"; then
+          echo "✅ Root Home Manager updated"
+        else
+          echo "❌ Root Home Manager update failed"
+          return 1
+        fi
+
+        echo "🔄 Rebuilding Home Manager for henrik..."
+        if runuser -u henrik -- home-manager switch --flake "$REPO#henrik"; then
+          echo "✅ Henrik's Home Manager updated"
+        else
+          echo "❌ Henrik's Home Manager update failed"
+          return 1
+        fi
+
+        echo ""
+        echo "✨ All upgrades completed successfully!"
+        return 0
       }
     '';
   };

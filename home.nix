@@ -85,6 +85,17 @@ in
     hp-unified-linux-driver
     texliveFull
     inkscape-with-extensions
+    gcc
+    pkg-config
+    openssl
+    # git:
+    gh
+    # Video redigeringsprogram:
+    shotcut
+    # AI:
+    claude-code
+    code-cursor
+    zed-editor
  ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
