@@ -4,24 +4,13 @@
 
 { config, pkgs, ... }:
 
-let
-  unstable = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz") {
-    config.allowUnfree = true;
-  };
-  sops-nix = builtins.fetchTarball {
-    url = "https://github.com/Mic92/sops-nix/archive/master.tar.gz";
-  };
-in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./modules/packages.nix
       ./modules/users.nix
-      # Home Manager module
-      <home-manager/nixos>
-      # sops-nix for hemmeligheter
-      "${sops-nix}/modules/sops"
+      # Home Manager og sops-nix moduler importeres via flake.nix
     ];
 
 #  nix = {
@@ -33,6 +22,8 @@ in
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.configurationLimit = 20;
+
 
   # Systemd-initrd: nødvendig for root=fstab med LUKS-kryptering på nyere NixOS.
   boot.initrd.systemd.enable = true;
@@ -63,11 +54,13 @@ in
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
-  # Hyprland – siste versjon fra nixpkgs-unstable
+  # Hyprland
+  programs.uwsm.enable = true;
+
   programs.hyprland = {
     enable = true;
-    package = unstable.hyprland;
-    portalPackage = unstable.xdg-desktop-portal-hyprland;
+    package = pkgs.hyprland;
+    portalPackage = pkgs.xdg-desktop-portal-hyprland;
     xwayland.enable = true;
   };
 
@@ -137,6 +130,16 @@ in
   nixpkgs.config.allowUnfree = true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Kjør dynamisk linkede tredjeparts-binærfiler (f.eks. GitHub Copilot-agent i Zed) på NixOS.
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc.lib
+      zlib
+      openssl
+    ];
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

@@ -77,7 +77,7 @@ in
     hyprshot
     satty
     onlyoffice-desktopeditors
-    libreoffice
+    libreoffice-fresh
     kdePackages.okular
     zathura
     evince
@@ -96,6 +96,7 @@ in
     claude-code
     code-cursor
     zed-editor
+    jq
  ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
