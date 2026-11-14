@@ -21,7 +21,7 @@ in
     enable = true;
     shell = "${pkgs.zsh}/bin/zsh";
   };
-  
+
   home.packages = with pkgs; [
     htop
     neovim
@@ -72,12 +72,13 @@ in
     viu
     chafa
     kitty
+    foot
     broot
     zoom-us
     hyprshot
     satty
     onlyoffice-desktopeditors
-    libreoffice-fresh
+    libreoffice
     kdePackages.okular
     zathura
     evince
@@ -85,6 +86,7 @@ in
     hp-unified-linux-driver
     texliveFull
     inkscape-with-extensions
+    gimp
     gcc
     pkg-config
     openssl
@@ -97,6 +99,8 @@ in
     code-cursor
     zed-editor
     jq
+    wire-desktop
+    go
  ];
 
   # Script for broot preview (placed in ~/bin by home-manager)
@@ -313,15 +317,6 @@ $1 ~ /^g/ && $2 ~ /^git /
     enable = true;
     package = pkgs.vscode;
   };
-
-  # Ensure VS Code uses the patched Nerd Font for editor and integrated terminal.
-  # This file is managed by Home Manager; adjust if you keep local settings elsewhere.
-  home.file.".config/Code/User/settings.json".text = ''{
-  "editor.fontFamily": "JetBrainsMono Nerd Font Mono, JetBrainsMono Nerd Font, FiraCode Nerd Font, Fira Code, monospace",
-  "editor.fontLigatures": true,
-  "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono, FiraCode Nerd Font, monospace"
-}
-'';
 
   # Kitty terminal config: use the patched Nerd Font so icons/glyphs render
   home.file.".config/kitty/kitty.conf".text = ''
